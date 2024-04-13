@@ -9,10 +9,14 @@ public class Spellcast : MonoBehaviour
     [SerializeField] private float iLineWidth;
     [SerializeField] private float iTimer;
     [SerializeField] private float iInterval;
+
+    [SerializeField] private Texture2D TexC;
+    public Texture2D RuneC{get;set;}
+    [SerializeField] private GameObject ObjPercentage;
     
     void Start()
     {
-
+        RuneC = TexC;
     }
 
     void Update()

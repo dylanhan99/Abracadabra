@@ -65,9 +65,15 @@ public class Spell : MonoBehaviour
         OverallMinPoint = new(float.MaxValue, float.MaxValue);
         OverallMaxPoint = new(float.MinValue, float.MinValue);
 
-        TargetSize = new(128,128);
+        TargetSize = new(64,64);
 
         texture = new Texture2D((int)TargetSize.x, (int)TargetSize.y);
+
+        Color[] colors = new Color[(int)TargetSize.x*(int)TargetSize.y];
+        for (int i = 0; i < colors.Length; ++i)
+            colors[i].a = 0;
+        
+        texture.SetPixels(colors);
         texture.wrapMode = TextureWrapMode.Clamp;
     }
 
@@ -106,7 +112,7 @@ public class Spell : MonoBehaviour
                 m_Mesh.GetVertices(vertices);
                 m_Mesh.GetIndices(indices, 0);
 
-                Debug.Log(vertices.Count);
+                //Debug.Log(vertices.Count);
 
                 // Finding the overall minimum point
                 foreach (Vector3 vert in vertices)
@@ -120,6 +126,7 @@ public class Spell : MonoBehaviour
                 float overallWidth = OverallMaxPoint.x - OverallMinPoint.x;
                 float overallHeight = OverallMaxPoint.y - OverallMinPoint.y;
 
+                int countBlack = 0;
                 for (int i = 0; i < indices.Count; i += 3)
                 {
                     int i0 = indices[i];
@@ -166,23 +173,51 @@ public class Spell : MonoBehaviour
                             );
 
                             int index = (int)(relativePoint.y) * (int)TargetSize.x + (int)(relativePoint.x);
-                            
-                            if (e0.PointInEdge(x, y) && e1.PointInEdge(x, y) && e2.PointInEdge(x, y))
+                            if (index < (TargetSize.x * TargetSize.y) && pixels[index].a <= 0)
                             {
-                                count++;
-                                pixels[index] = Color.black;
-                            }  
-                            else
-                            {
-                                pixels[index] = Color.white;
+                                //if (e0.PointInEdge(x, y) && e1.PointInEdge(x, y) && e2.PointInEdge(x, y))
+                                //{
+                                //    count++;
+                                //    pixels[index] = Color.black;
+                                //}  
+                                //else
+                                //{
+                                //    pixels[index].a = 0;
+                                //}
+                                //else
+                                //{
+                                //    pixels[index] = Color.white;
+                                //}
+                                pixels[index].a = 1;
+                                ++countBlack;
                             }
-                            pixels[index] = Color.black;
                         }
                     }
                     //Debug.Log(count);
                     texture.SetPixels(pixels);
+                    //texture.SetPixels(GameObject.Find("Spellcaster").GetComponent<Spellcast>().RuneC.GetPixels());
                     texture.Apply();
                 }
+
+                // Compare Textures
+                float percentage = 0;
+                {
+                    int counter = 0;
+                    Color[] drawnPixels = texture.GetPixels();
+                    Color[] runePixels = GameObject.Find("Spellcaster").GetComponent<Spellcast>().RuneC.GetPixels();
+                    for (int y = 0; y < TargetSize.y; ++y)
+                    {
+                        for (int x = 0; x < TargetSize.x; ++x)
+                        {
+                            int index = y * (int)TargetSize.x + x;
+                            if (drawnPixels[index].a > 0 && runePixels[index].a > 0)
+                               ++counter;
+                        }
+                    }
+
+                    percentage = (float)counter / (float)countBlack * 100f;
+                }
+                GameObject.Find("Percentage").GetComponent<TMPro.TextMeshProUGUI>().text = percentage.ToString();
             }
         }
     }
