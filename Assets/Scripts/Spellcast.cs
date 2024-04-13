@@ -32,6 +32,7 @@ public class Spellcast : MonoBehaviour
         lr.startWidth = iLineWidth;
         lr.endWidth = iLineWidth;
         lr.material = iLineMaterial;
+        lr.useWorldSpace = true;
         lr.enabled = true;
 
         Spell sp = newLine.AddComponent<Spell>();
